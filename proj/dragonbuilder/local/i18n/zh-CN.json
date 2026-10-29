@@ -2,7 +2,7 @@
   "meta": {
     "code": "zh-CN",
     "name": "中文",
-    "title": "Dragon Builder 离线版"
+    "title": "Dragon Builder"
   },
   "text": {
     "--- Offbrand Fan Dragons ----": "—— 同人龙预设 ——",
@@ -15,7 +15,7 @@
     "Angry": "愤怒",
     "Ankle socks": "脚踝袜纹",
     "Arashi the Wolf-Dragon": "狼龙-岚",
-    "Are you sure?": "确定吗?",
+    "Are you sure?": "确定?",
     "Arkus the Storm Dragon": "风暴龙-阿库斯",
     "Armor plates": "装甲板",
     "Armor scutes": "装甲鳞甲",
@@ -114,7 +114,7 @@
     "Elven": "精灵耳",
     "Equine": "马形吻",
     "Equine hooves": "马蹄足",
-    "Export Settings File": "导出设置文件",
+    "Export Settings File": "导出预设",
     "Eye patch": "眼罩",
     "Eye shape:": "眼睛形状:",
     "Eye/face marking 1:": "眼部/面部花纹 1:",
@@ -214,7 +214,7 @@
     "IceWing": "冰翼龙（火翼飞龙）",
     "Icing": "糖霜纹",
     "Imperial Red-Gold Lung": "赤金帝王龙",
-    "Import Settings File": "导入设置文件",
+    "Import Settings File": "导入预设",
     "Inner glow": "内发光",
     "Insectoid": "复眼",
     "Interested": "关切",
@@ -450,8 +450,8 @@
     "Failed to load preset.": "预设加载失败。",
     "Save file is too large.": "文件过大,无法保存。",
     "Invalid file type.": "文件类型不支持。",
-    "Failed to load dragon file.": "龙的文件加载失败。",
-    "MonsterBrainSoup Dragon Builder - Local Offline Edition": "MonsterBrainSoup捏龙工具",
+    "Failed to load dragon file.": "文件加载失败。",
+    "MonsterBrainSoup": "MonsterBrainSoup捏龙工具",
     "Preview": "预览",
     "Original site": "原站",
     "No extra part": "无额外部件",
