@@ -1,0 +1,1860 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dragon Builder — Local</title>
+<link rel="icon" href="data:,">
+<script>(function(){try{var m=localStorage.getItem('db.theme')||'auto';var d=m==='dark'||(m==='auto'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';}catch(e){}})();</script>
+<style>
+html, body { margin: 0; padding: 0; background: #ffffff; font-family: Verdana, Geneva, sans-serif; }
+*, *::before, *::after { box-sizing: border-box; }
+.local-shell { max-width: 1140px; margin: 0 auto; padding: 10px 15px 40px; }
+/* Basic Layout */
+@media screen and (max-width: 760px) {
+
+    body, html {
+        width: 100%;
+    }
+
+    #layoutContainer {
+        display: block;
+    }
+
+    #layoutMenucolumn {
+        width: 100%;
+        flex-basis: 100%;
+        align-self: stretch;
+    }
+
+  #finalImageContainer {
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto; 
+}
+
+    #optionscontainer {
+        max-height: none;
+        overflow: visible;
+    }
+
+    .preset-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .presetmenu,
+    .loadbutton {
+        width: 100%;
+    }
+}
+
+
+
+#layoutMenucolumn {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    min-width: 250px;
+}
+
+#tabmenu {
+    display: flex;
+    width: 100%;
+}
+
+.tabsection {
+    flex: 1;
+    border: none;
+    outline: none;
+    border-radius: 5px 5px 0 0;
+    overflow: hidden;
+}
+
+#layoutContainer {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+#layoutWrapper {
+    flex: 1;
+    position: relative;
+    min-width: 300px;
+}
+
+#optionscontainer {
+width: 100%;
+max-height: 500px;
+display: block;
+overflow-y: scroll;
+overflow-x: hidden;
+}
+
+/* Scrollbar Dynamic Styling per Tab */
+#optionscontainer::-webkit-scrollbar {
+  width: 10px;
+}
+
+#optionscontainer::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+#optionscontainer::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-color, #ffa6be);
+  border-radius: 6px;
+}
+
+#optionscontainer::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-color-hover, #ff8fab);
+}
+
+
+#tab1 img, #tab2 img, #tab3 img, #tab4 img, #tab5 img {
+    max-width: 80%;
+}
+
+
+select:disabled,
+input:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+select option {
+padding: 5px;
+}
+
+#optionscontainer hr {
+display: block;
+text-align: left;
+margin-left: 1px;
+margin-top: 13px;
+margin-bottom: 16px;
+border-style: dashed;
+border-color: #adadad;
+border-width: 1px;
+width: 70%;
+}
+
+#finalImageContainer {
+  max-width: 600px;
+  position: relative;
+}
+
+#canvasFinal {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.preset-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.presetmenu {
+    flex: 1 1 200px;
+}
+
+.loadbutton {
+    flex: 0 0 auto;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.input-row select {
+  max-width: 160px;
+  min-width: 100px;
+  width: auto;
+  flex-shrink: 1;
+}
+
+.color-input-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.color-input-container input[type="text"] {
+            margin-left: 5px;
+            width: 80px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+.utilitiesPanel {
+border-width: 1px;
+padding-top: 5px;
+border-radius: 2px 2px 2px 2px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.column select {
+text-align: left;
+margin-left: 5px;
+}
+	  
+.colorselector {
+position:relative;
+padding-left: 10px;
+margin-left: 10px;
+}
+
+.finalImage {
+max-width:600px;	
+}
+
+
+/* Confirmation Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+}
+
+.modal-box {
+  background: #222;
+  color: #fff;
+  padding: 20px 30px;
+  border-radius: 12px;
+  text-align: center;
+  min-width: 280px;
+}
+
+.modal-buttons {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.modal-buttons button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#confirmYes {
+  background: #4caf50;
+  color: white;
+}
+
+#confirmNo {
+  background: #777;
+  color: white;
+}
+
+
+
+/* Loading Spinner */
+
+#loadingScreen {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+text-align: center; 
+    justify-content: center;
+    align-items: center;
+}
+
+.loadingSpinner {
+	position: relative;
+   --d: 31.7px;
+   width: 5.8px;
+   height: 5.8px;
+   border-radius: 50%;
+   color: #47a4ff;
+   box-shadow: calc(1*var(--d))      calc(0*var(--d))     0 0,
+          calc(0.707*var(--d))  calc(0.707*var(--d)) 0 1.4px,
+          calc(0*var(--d))      calc(1*var(--d))     0 2.9px,
+          calc(-0.707*var(--d)) calc(0.707*var(--d)) 0 4.3px,
+          calc(-1*var(--d))     calc(0*var(--d))     0 5.8px,
+          calc(-0.707*var(--d)) calc(-0.707*var(--d))0 7.2px,
+          calc(0*var(--d))      calc(-1*var(--d))    0 8.6px;
+   animation: spinner-a90wxe 1s infinite steps(8);
+}
+
+@keyframes spinner-a90wxe {
+   100% {
+      transform: rotate(1turn);
+   }
+}
+
+/* Menu Tabs */
+
+#optionscontainer {
+width: 100%;
+display: block;
+padding: 10px;
+border-right-style: solid;
+border-bottom-style: solid;
+border-left-style: solid;
+border-top-style: solid;
+border-width: 5px;
+border-color: #ffa6be;
+border-radius: 0 0 8px 8px;
+overflow: auto;
+}
+
+#optionscontainer h4 {
+display: block;
+line-height:100%;
+font-size: 12px;
+color: #969b9e;
+}
+
+#optionscontainer h3 {
+line-height:100%;
+font-size: 14px;
+color: #161a1c;
+}
+
+#tab1 {
+width: 20%;
+background-color:#ffa6be;
+color: #ffa6be;
+}
+
+#tab2 {
+width: 20%;
+background-color:#ffe4a6;
+color: #ffe4a6;
+}
+
+#tab3 {
+width: 20%;
+background-color:#d3ffa6;
+color: #d3ffa6;
+}
+	  
+#tab4 {
+width: 20%;
+background-color:#a6ddff;
+color: #a6ddff;
+}
+
+#tab5 {
+width: 20%;
+background-color:#e3a6ff;
+color: #e3a6ff;
+}
+	  
+#canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+
+/* Buttons */
+
+	  
+.utilbutton {
+  text-align: center;
+  padding: 6px;
+  margin: 10px;
+  border: none;
+  color: white;
+  font-size: 14px;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  --btn-bg: #4768c4;
+  --btn-hover: #486fdb;
+  --btn-active: #324e99;
+
+  background-color: var(--btn-bg);
+}
+
+.utilbutton:hover:not(:disabled) {
+  background-color: var(--btn-hover);
+  font-weight: bold;
+}
+
+.utilbutton:active:not(:disabled) {
+  background-color: var(--btn-active);
+  font-weight: bold;
+}
+
+.utilbutton:disabled {
+  background-color: #bbb;
+  color: #666;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.utilbutton.green {
+  --btn-bg: #4caf50;
+  --btn-hover: #5fc963;
+  --btn-active: #3d8b40;
+}
+
+.utilbutton.red {
+  --btn-bg: #e74c3c;
+  --btn-hover: #ff5c4d;
+  --btn-active: #c0392b;
+}
+
+.utilbutton.orange {
+  --btn-bg: #ff9a5c;
+  --btn-hover: #ff914d;
+  --btn-active: #ff6100;
+}
+
+
+/* Fake Button for File Input */
+.fakeButton {
+  display: inline-block;
+  padding: 6px;
+  border-radius: 3px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #fff;
+  background-color: #ff9a5c;
+  border: none;
+  cursor: pointer;
+}
+</style>
+<link rel="stylesheet" href="/proj/dragonbuilder/local/local-ui.css?v=mvshw1bc">
+<script src="/proj/dragonbuilder/js/core.js"></script>
+<script src="/proj/dragonbuilder/js/utils.js"></script>
+<script src="/proj/dragonbuilder/js/layers.js"></script>
+<script src="/proj/dragonbuilder/js/canvasManager.js"></script>
+<script src="/proj/dragonbuilder/js/inputs.js"></script>
+<script src="/proj/dragonbuilder/js/presets.js"></script>
+<script src="/proj/dragonbuilder/js/compositor.js"></script>
+<script src="/proj/dragonbuilder/js/listeners.js"></script>
+<script src="/proj/dragonbuilder/js/init.js"></script>
+<script src="/proj/dragonbuilder/js/randomize.js"></script>
+<script src="/proj/dragonbuilder/local/i18n.js?v=mvshw1bc"></script>
+<script src="/proj/dragonbuilder/local/local-ui.js?v=mvshw1bc"></script>
+</head>
+<body>
+<div class="local-shell">
+<header class="local-header">
+  <div class="brand">
+    <h1>Dragon Builder <span class="badge">OFFLINE</span></h1>
+    <p class="subtitle"><span class="subtitle-text">MonsterBrainSoup Dragon Builder - Local Offline Edition</span><a class="brand-link" href="https://www.monsterbrainsoup.com/dragon-builder/" target="_blank" rel="noopener noreferrer"><span>Original site</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3h7v7"/><path d="M21 3l-9 9"/><path d="M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6"/></svg></a></p>
+  </div>
+  <div class="header-controls">
+    <label class="lang-control">
+      <span class="sr-only">Language</span>
+      <select id="localLangSelect" aria-label="Language">
+        <option value="zh-CN">中文</option>
+        <option value="en">English</option>
+      </select>
+    </label>
+    <button id="localThemeToggle" class="icon-button" type="button" aria-label="Theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path d="M12 3.8v16.4"/><path d="M12 3.8a8.2 8.2 0 0 1 0 16.4z" fill="currentColor" stroke="none"/></svg></button>
+  </div>
+</header>
+<canvas id="canvasBase" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasBellyColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasBellyLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasBreath" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasBrowColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasBrowLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasEarFrontBase" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasEarFrontFlesh" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasEarFrontLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasEarRearBase" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasEarRearFlesh" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasEarRearLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasEyeScleraColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasEyeMarking" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasEyeColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasEyePupil" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasEyelineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasFangFrontBone" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasFangFrontLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasFangRearBone" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasFangRearLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasForelegFrontdecColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasForelegFrontdecColor2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasForelegFrontdecLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasForelegFrontdecLineart2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasForelegReardecColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasForelegReardecColor2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasForelegReardecLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasForelegReardecLineart2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHeadacc" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHeadtopcolor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHeadtoplineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHindlegFrontdecColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHindlegFrontdecColor2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHindlegFrontdecLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHindlegFrontdecLineart2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHindlegReardecColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHindlegReardecColor2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHindlegReardecLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHindlegReardecLineart2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHornFrontColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHornFrontLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHornFrontAcc" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHornRearColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHornRearLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasHornRearAcc" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasJawdecColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasJawdecColor2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasJawdecLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasJawdecLineart2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegForeFrontBase" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegForeFrontBone" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegForeFrontFlesh" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegForeFrontLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegForeFrontMarking" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegForeFrontMarking2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegForeRearBase" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegForeRearBone" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegForeRearFlesh" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegForeRearLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegForeRearMarking" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegForeRearMarking2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegHindFrontBase" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegHindFrontBone" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegHindFrontFlesh" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegHindFrontLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegHindFrontMarking" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegHindFrontMarking2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegHindRearBase" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegHindRearBone" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegHindRearFlesh" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegHindRearLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegHindRearMarking" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLegHindRearMarking2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasBaseTexture" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasManeColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasManeLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasMarking1" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasMarking2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasMarking3" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasMouthbone" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasMouthflesh" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasMouthlineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasNeckacc" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasSnoutAddColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasSnoutAddLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasSnoutBase" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasSnoutLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasSnoutMarking" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasSpinedecColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasSpinedecLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasSpinedecColor2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasSpinedecLineart2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasSpinedecColor3" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasSpinedecLineart3" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasTailacc" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasTaildecColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasTaildecColor2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasTaildecLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasTaildecLineart2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasTailmarking" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasTailmarking2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasTorsoacc" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasTorsoacc2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWhiskerfront" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWhiskerfrontlineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWhiskerrear" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWhiskerrearlineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingFrontBase" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingFrontBone" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingFrontColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingFrontDorsalMarking" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingFrontDorsalMarking2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingFrontLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingFrontVentralMarking" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingFrontVentralMarking2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingRearBase" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingRearBone" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingRearColor" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingRearDorsalMarking" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingRearDorsalMarking2" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingRearLineart" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingRearVentralMarking" width="1200" height="1000" style="display:none;"></canvas>
+<canvas id="canvasWingRearVentralMarking2" width="1200" height="1000" style="display:none;"></canvas>
+<div id="layoutContainer">
+	
+<div id="layoutWrapper">
+<br />
+<div id="finalImageContainer">
+<div id="loadingScreen">
+	<div class="loadingSpinner">
+		</div><!-- loadingspinner -->	
+	</div><!-- loadingScreen -->	
+	<canvas id="canvasFinal" width="1200" height="1000"></canvas>
+	<img id="finalImage" alt="... LOADING, PLEASE WAIT ..."  style="display:none;">
+</div> <!-- finalImageContainer -->
+<br />
+<br />
+
+<div id="utilitiesPanel" align="center">
+
+<button id="undoButton" class="utilbutton orange" disabled>Undo</button>
+&nbsp; &nbsp; <button id="downloadPNGButton" class="utilbutton">Download PNG</button> &nbsp; &nbsp; 
+<button id="redoButton" class="utilbutton green" disabled>Redo</button>
+<br />
+
+<button id="redrawButton" class="utilbutton" style="display:none;">Re-Draw</button>
+
+<br />
+<button id="resetButton" class="utilbutton red">Reset</button>
+<br />
+
+<select id="randomizeSelect">
+<option value="" selected disabled>Choose How to Randomize</option>
+<option value="all">Randomize All</option>
+<option value="traits">Randomize Traits</option>
+<option value="colors">Randomize Colors</option>
+<option value="markings">Randomize Markings</option>
+<option value="accessories">Randomize Accessories</option>
+</select>
+
+<button id="randomizeButton" class="utilbutton yellow" disabled>Randomize</button>
+
+
+</div><!-- utilitiesPanel -->
+
+</div><!-- wrapper -->	
+
+<div id="layoutMenucolumn">
+
+<div id="tabmenu">
+<button id="tab1" class="tabsection" onclick="DragonBuilder.openTab(0)" style="font-weight:bold;color:black;"><img data-recalc-dims="1" decoding="async" id="tab1img" src="/proj/dragonbuilder/menu_head.png" alt="Tab 1 - Head" /> <br/>HEAD</button>
+<button id="tab2" class="tabsection" onclick="DragonBuilder.openTab(1)" style="color:black;"><img data-recalc-dims="1" decoding="async" id="tab2img"  src="/proj/dragonbuilder/menu_body.png" alt="Tab 2 - Torso" /> <br/>TORSO</button>
+<button id="tab3" class="tabsection" onclick="DragonBuilder.openTab(2)" style="color:black;"><img data-recalc-dims="1" decoding="async" id="tab3img"  src="/proj/dragonbuilder/menu_legs.png" alt="Tab 3 - Legs"/> <br/>LEGS</button>
+<button id="tab4" class="tabsection" onclick="DragonBuilder.openTab(3)" style="color:black;"><img data-recalc-dims="1" decoding="async" id="tab4img"  src="/proj/dragonbuilder/menu_wings.png" alt="Tab 4 - Wings"/><br/>WINGS</button>
+<button id="tab5" class="tabsection" onclick="DragonBuilder.openTab(4)" style="color:black;"><img data-recalc-dims="1" decoding="async" id="tab5img"  src="/proj/dragonbuilder/menu_tail.png" alt="Tab 5 - Tail"/><br/>TAIL</button>
+	
+</div><!-- tabmenu -->	
+	
+<div id="optionscontainer">
+<div id="section1">
+
+<label for="eyeStyle">Eye shape:</label>
+<select id="eyeStyle">
+	<option value="01">Default</option>
+	<option value="02">Almond</option>
+	<option value="03">Narrowed</option>
+	<option value="04">Insectoid</option> 
+	<option value="05">Girlypop</option>
+	<option value="06">Doublevision</option>
+	<option value="12">Triplevision</option>
+	<option value="09">Kawaii</option>
+	<option value="10">Derpy</option>
+	<option value="11">Third eye</option>
+	<option value="07">Happy squint</option>
+	<option value="08">Closed calm</option>
+</select>
+
+<label for="eyeScleraColor">Sclera color:</label>
+<div class="color-input-container">
+	<input type="color" id="eyeScleraColor" value="#FFFFFD">
+	<input type="text" id="eyeScleraColorHex" value="#FFFFFD">
+</div><!-- color-input-container -->
+	
+<label for="eyeColor">Iris color:</label>
+<div class="color-input-container">
+	<input type="color" id="eyeColor" value="#FDCD73">
+	<input type="text" id="eyeColorHex" value="#FDCD73">
+</div><!-- color-input-container -->
+
+<label>
+<input type="checkbox" id="eyePupilCheckbox" checked="checked"> Pupil
+</label>
+
+<br />
+<hr width="80%" />
+<br />
+
+<label for="eyemarkingStyle">Eye/face marking 1:</label>
+	<select id="eyemarkingStyle">
+	<option value="none">None</option>
+	<option value="01">Surround</option>
+	<option value="07">Overshadow</option>
+	<option value="02">Undershadow</option>
+	<option value="08">Winged shadow</option>
+	<option value="03">Tear stripe 1</option>
+	<option value="06">Tear stripe 2</option>
+	<option value="22">Tear stripe 3</option>
+	<option value="04">Pharaoh</option>
+	<option value="05">Radiant lines</option>
+	<option value="10">Descending dots</option>
+	<option value="09">Cheek freckles</option>
+	<option value="11">Nose freckles</option>
+	<option value="12">False brow</option>
+	<option value="13">Nose scratch</option>
+	<option value="14">Triple eye swipe</option>
+	<option value="15">Single eye scratch</option>
+    <option value="16">Cheek scales</option>
+    <option value="21">Cheek skulls</option>
+	<option value="17">Head patch</option>
+    <option value="18">Head dashes</option>
+	<option value="20">Head scales</option>
+	<option value="19">Under-eye scales</option>
+
+
+	</select>
+<div class="color-input-container">
+<input type="color" id="eyemarkingColor" value="#FFC25E">
+<input type="text" id="eyemarkingColorHex" value="#FFC25E">
+</div>	<!-- color-input-container -->	
+
+<br />
+
+<label for="eyemarkingStyle">Eye/face marking 2:</label>
+	<select id="eyemarkingStyle2" disabled>
+	<option value="none">None (coming soon)</option>
+	<option value="01">Surround</option>
+	<option value="07">Overshadow</option>
+	<option value="02">Undershadow</option>
+	<option value="08">Winged shadow</option>
+	<option value="03">Tear stripe 1</option>
+	<option value="06">Tear stripe 2</option>
+	<option value="22">Tear stripe 3</option>
+	<option value="04">Pharaoh</option>
+	<option value="05">Radiant lines</option>
+	<option value="10">Descending dots</option>
+	<option value="09">Cheek freckles</option>
+	<option value="11">Nose freckles</option>
+	<option value="12">False brow</option>
+	<option value="13">Nose scratch</option>
+	<option value="14">Triple eye swipe</option>
+	<option value="15">Single eye scratch</option>
+    <option value="16">Cheek scales</option>
+    <option value="21">Cheek skulls</option>
+	<option value="17">Head patch</option>
+    <option value="18">Head dashes</option>
+	<option value="20">Head scales</option>
+	<option value="19">Under-eye scales</option>
+	</select>
+<div class="color-input-container">
+<input type="color" id="eyemarkingColor2" value="#FFC25E">
+<input type="text" id="eyemarkingColor2Hex" value="#FFC25E">
+</div>	<!-- color-input-container -->	
+
+<br />
+<hr width="80%" />
+<br />
+<label for="browStyle">Eyebrow style:</label>
+<select id="browStyle">
+	<option value="none">None</option>
+	<option value="01">Armored scutes</option>
+	<option value="02">Fur</option>
+	<option value="03">Spikes</option>
+	<option value="04">Ridge</option>
+</select>
+
+<label for="browPosition">Brow expression:</label>
+<select id="browPosition">
+	<option value="01">Interested</option>
+	<option value="02">Serious</option>
+	<option value="03">Angry</option>
+	<option value="04">Worried</option>
+</select>	
+	
+<div class="color-input-container">
+	<input type="color" id="browColor" value="#6ABEFD">
+	<input type="text" id="browColorHex" value="#6ABEFD">
+</div> <!-- color-input-container -->
+<br />
+<hr width="80%" />
+<br />
+<label for="snoutStyle">Snout Shape:</label>
+<select id="snoutStyle">
+   <option value="none">Short</option>
+	<option value="01">Canine</option>
+	<option value="03">Equine</option>
+	<option value="02">Slim</option>
+	<option value="04">Short beak</option>
+	<option value="05">Upturned</option>
+	<option value="06">Shark</option>
+	<option value="07">Panther</option>
+	<option value="08">Square</option>
+	<option value="09">Blocky</option>
+	<option value="10">Wedge</option>
+	<option value="11">Nubby</option>
+	<option value="12">Chomper</option>
+	<option value="13">Scissorbeak</option>
+	<option value="14">Snippy</option>
+	<option value="15">Bulky</option>
+	<option value="16">Fluted</option>
+	<option value="17">Kitty</option>
+	<option value="18">Noble</option>
+	<option value="19">Axenose</option>
+	<option value="20">Hornbeak</option>
+	<option value="21">Croc</option>
+	<option value="22">Bighorn</option>
+	<option value="23">Bigjaw</option>
+    <option value="24">Vulpine</option>
+    <option value="25">Chin-jut</option>
+</select>
+
+<br />
+<br />
+    <label for="snoutmarkingStyle">Snout marking 1:</label>
+	<select id="snoutmarkingStyle">
+	<option value="none">None</option>
+	<option value="01">Tip fade</option>
+	<option value="02">Lower jaw</option>
+	<option value="03">Nose patch</option>
+	<option value="04">Nose dashes</option>
+	</select>
+<div class="color-input-container">
+    <input type="color" id="snoutmarkingColor" value="#FFC25E">
+    <input type="text" id="snoutmarkingColorHex" value="#FFC25E">
+</div>	<!-- color-input-container -->
+
+<br />
+<br />
+    <label for="snoutmarkingStyle2">Snout marking 2:</label>
+	<select id="snoutmarkingStyle2" disabled>
+	<option value="none">None (coming soon)</option>
+	<option value="01">Tip fade</option>
+	<option value="02">Lower jaw</option>
+	<option value="03">Nose patch</option>
+	<option value="04">Nose dashes</option>
+	</select>
+<div class="color-input-container">
+    <input type="color" id="snoutmarkingColor2" value="#FFC25E">
+    <input type="text" id="snoutmarkingColor2Hex" value="#FFC25E">
+</div>	<!-- color-input-container -->
+
+<br />
+<hr width="80%" />
+<br />
+<label for="snoutAddStyle">Snout add-on:</label>
+<select id="snoutAddStyle" disabled>
+	<option value="none">None (coming soon)</option>
+</select>
+    <div class="color-input-container" >
+        <input type="color" id="snoutAddColor" value="#6ABEFD">
+        <input type="text" id="snoutAddColorHex" value="#6ABEFD">
+    </div>	<!-- color-input-container -->	
+
+<br />
+<hr width="80%" />
+<br />	
+<label for="mouthStyle">Mouth expression:</label>
+<select id="mouthStyle">
+   <option value="none">Neutral</option>
+	<option value="01">Little smile</option>
+	<option value="02">Big smile</option>
+	<option value="03">Frown</option>
+	<option value="04">Little grin</option>
+	<option value="05">Big grin</option>
+	<option value="06">Grimace</option>
+	<option value="07">Tongue out</option>
+</select>
+<br />
+<hr width="80%" />
+<br />
+<label for="maneStyle">Mane:</label>
+<select id="maneStyle">
+	<option value="none">None</option>
+	<option value="03">Short fur mohawk</option>
+	<option value="01">Medium fluffy fur</option>
+	<option value="02">Medium wavy fur</option>
+	<option value="04">Long wispy fur</option>
+	<option value="10">Forward floofy fur</option>
+	<option value="08">Lion mane</option>
+	<option value="12">Furry neck</option>
+	<option value="05">Bony fin</option>
+	<option value="11">Frill fin</option>
+	<option value="06">Spikes</option>
+	<option value="07">Feathers</option>
+	<option value="09">Crest</option>
+	<option value="13">Quills</option>
+	<option value="14">Quill crown</option>
+</select>
+    <div class="color-input-container">
+        <input type="color" id="maneColor" value="#6ABEFD">
+        <input type="text" id="maneColorHex" value="#6ABEFD">
+    </div>	<!-- color-input-container -->
+<br />
+<hr width="80%" />
+<br />
+<label for="headtopStyle">Head top add-on:</label>
+<select id="headtopStyle">
+	<option value="none">None</option>
+	<option value="01">Small forward hair fluff</option>
+	<option value="02">Center parted hair fluff</option>
+	<option value="03">Forward fluffy hair</option>
+	<option value="04">Medium wavy hair</option>
+	<option value="06">Long hair</option>
+	<option value="08">Upward ahoge</option>
+	<option value="09">Double forward ahoge</option>
+	<option value="10">Bouncy forward ahoge</option>
+	<option value="07">Angler lure</option>
+</select>
+    <div class="color-input-container">
+        <input type="color" id="headtopColor" value="#6ABEFD">
+        <input type="text" id="headtopColorHex" value="#6ABEFD">
+    </div>	<!-- color-input-container -->
+<br />
+<hr width="80%" />
+<br />
+<label for="hornStyle">Horns (uses bone color):</label>
+<select id="hornStyle">
+    <option value="none">None</option>
+	<option value="01">Short hooked</option>
+	<option value="02">Gently curved</option>
+	<option value="03">Straight n' sharp</option>
+	<option value="04">Big swoops</option>
+	<option value="05">Chargers</option>
+	<option value="06">Uni-horn</option>
+	<option value="07">Double uni-horn</option>
+	<option value="08">Small antlers</option>
+	<option value="09">Curved-back</option>
+	<option value="10">Curled ram</option>
+    <option value="11">Big antlers</option>
+    <option value="12">Pseudo-antlers</option>
+</select>	
+<br />
+    <div class="color-input-container" style="display:none">
+        <input type="color" id="hornColor" value="#6ABEFD" style="display:none">
+        <input type="text" id="hornColorHex" value="#6ABEFD" style="display:none">
+    </div>	<!-- color-input-container -->
+<br />
+<label for="hornAcc">Horn accessory:</label>
+	<select id="hornAcc" disabled>
+	<option value="none">None (coming soon)</option>
+	</select>	
+<br />
+<hr width="80%" />
+<br />
+	
+<label for="earStyle">Ears (uses base & flesh color):</label>
+<select id="earStyle">
+    <option value="none">None</option>
+	<option value="01">Elven</option>
+	<option value="02">Cupped</option>
+	<option value="13">Small points</option>
+	<option value="03">Kittywolf</option>
+	<option value="04">Fin</option>
+	<option value="05">Feathers</option>
+	<option value="06">Winged</option>
+	<option value="07">Alien headknobs</option>
+	<option value="08">Gecko slit</option>
+	<option value="09">Tympanic shield</option>
+	<option value="11">Perky wolfish</option>
+	<option value="12">Flappynubs</option>
+    <option value="14">Cobra hood</option>
+</select>
+
+<br />
+<hr width="80%" />
+<br />
+<label for="jawdecStyle">Jaw add-on (in front of ear):</label>
+<select id="jawdecStyle">
+    <option value="none">None</option>
+	<option value="01">Fin - high</option>
+	<option value="02">Fin - low</option>
+	<option value="03">Spikes</option>
+	<option value="06">Big spikes</option>
+	<option value="04">Fur</option>
+	<option value="05">Feathers</option>
+	<option value="07">Nubbies</option>
+	<option value="08">Sub-horn</option>
+    <option value="09">Sea slug</option>
+	<option value="10">Huge fin</option>
+	<option value="11">Skulljaw</option>
+</select>
+    <div class="color-input-container">
+        <input type="color" id="jawdecColor" value="#6ABEFD">
+        <input type="text" id="jawdecColorHex" value="#6ABEFD">
+    </div>	<!-- color-input-container -->	
+	<br />
+<label for="jawdecStyle2">Jaw add-on 2 (behind ear):</label>
+<select id="jawdecStyle2">
+    <option value="none">None</option>
+	<option value="01">Fin - high</option>
+	<option value="02">Fin - low</option>
+	<option value="03">Spikes</option>
+	<option value="06">Big spikes</option>
+	<option value="04">Fur</option>
+	<option value="05">Feathers</option>
+	<option value="07">Nubbies</option>
+	<option value="08">Sub-horn</option>
+    <option value="09">Sea slug</option>
+	<option value="10">Huge fin</option>
+	<option value="11">Skulljaw</option>
+</select>
+    <div class="color-input-container">
+        <input type="color" id="jawdecColor2" value="#6ABEFD">
+        <input type="text" id="jawdecColor2Hex" value="#6ABEFD">
+    </div>	<!-- color-input-container -->	
+
+    
+<br />
+<hr width="80%" />
+<br />
+<label for="fangStyle">Bone add-on (uses bone color):</label>
+<select id="fangStyle">
+    <option value="none">None</option>
+	<option value="01">Upper fangs</option>
+	<option value="03">Snaggletooth</option>
+	<option value="04">Saber fangs</option>
+		<option value="02">Nose horn</option>
+</select>		
+ <br />
+<hr width="80%" />
+<br />
+<label for="whiskerStyle">Whiskers/antennae:</label>
+<select id="whiskerStyle">
+    <option value="none">None</option>
+	<option value="01">Short noodle</option>
+	<option value="02">Long noodle</option>
+	<option value="03">Kitty</option>
+	<option value="04">Chin danglies</option>
+	<option value="05">Viper eel</option>
+	<option value="06">Thin antennae</option>
+	<option value="07">Moth antennae</option>
+	<option value="08">Starnose</option>
+</select>	
+    <div class="color-input-container">
+        <input type="color" id="whiskerColor" value="#6ABEFD">
+        <input type="text" id="whiskerColorHex" value="#6ABEFD">
+    </div>	<!-- color-input-container -->	
+
+<br />
+<hr width="80%" />
+<br />
+
+<label for="breath">Breath magic:</label>
+	<select id="breath">
+	<option value="none">No breath magic</option>
+	<option value="01">Fire</option>
+	<option value="02">Smoke</option>
+	<option value="03">Clouds</option>
+	<option value="04">Swirls</option>
+	<option value="05">Lightning</option>
+	<option value="06">Snow-swirl</option>
+	</select>
+<div class="color-input-container">
+    <input type="color" id="breathColor" value="#FFC25E">
+    <input type="text" id="breathColorHex" value="#FFC25E">
+</div>	<!-- color-input-container -->
+
+<br />
+<hr width="80%" />
+<br />
+<label for="headacc">Head accessory:</label>
+	<select id="headacc">
+	<option value="none">No head accessory</option>
+	<option value="01">Skull mask - white</option>
+	<option value="02">Skull mask - black</option>
+	<option value="03">Crown - gold</option>
+	<option value="04">Crown - black</option>
+	<option value="05">Bridle</option>
+	<option value="06">Tucked flower</option>
+	<option value="07">Eye patch</option>
+	<option value="08">Glasses</option>
+	</select>
+<br />
+<hr width="80%" />
+<br />
+<label for="neckacc">Neck accessory:</label>
+	<select id="neckacc">
+	<option value="none">No neck accessory</option>
+	<option value="01">Brown leather collar</option>
+	<option value="02">Black leather collar</option>
+	<option value="03">Black leather collar - spiked</option>
+	<option value="04">Black leather collar - clawed</option>
+	<option value="05">Chain collar</option>
+	<option value="06">Gold metal band</option>
+	<option value="10">Gold pendant necklace</option>
+	<option value="07">Scarf - white</option>
+	<option value="08">Scarf - black</option>
+	<option value="09">Scarf - red</option>
+	<option value="11">Leather pouch on string</option>
+	<option value="12">Lots of gold jewelry</option>
+	</select>
+</div> <!-- section1 -->
+
+<div id="section2" style="display:none">
+
+<label for="baseColor">Base Color:</label>
+    <div class="color-input-container">
+        <input type="color" id="baseColor" value="#FFFDF0">
+        <input type="text" id="baseColorHex" value="#FFFDF0">
+   </div> <!-- color-input-container -->
+   <br />	
+
+<label for="baseTexture">Base texture:</label>
+<select id="baseTexture">
+    <option value="none">Smooth skin</option>
+	<option value="01">Leathery skin</option>
+	<option value="02">Round scales</option>
+	<option value="04">Sharp scales</option>
+	<option value="03">Fish scales</option>
+	<option value="06">Interlocking scales</option>
+	<option value="05">Fur</option>
+	<option value="07">Shiny</option>
+	<option value="08">Rainbow shiny</option>
+	</select>
+	<br />
+<hr width="80%" />
+<br />
+<label for="boneColor">Bone Color (teeth, claws, horns, spikes):</label>
+    <div class="color-input-container">
+        <input type="color" id="boneColor" value="#CCBBA8">
+        <input type="text" id="boneColorHex" value="#CCBBA8">
+    </div> <!-- color-input-container -->
+<br />
+<label for="fleshColor">Flesh Color (inner ear, tongue, paws):</label>
+    <div class="color-input-container">
+        <input type="color" id="fleshColor" value="#D275BB">
+        <input type="text" id="fleshColorHex" value="#D275BB">
+    </div>	<!-- color-input-container -->
+<br />
+<hr width="80%" />
+<br />
+<label for="bellyStyle">Belly:</label>
+<select id="bellyStyle">
+    <option value="none">None</option>
+	<option value="01">Soft fade</option>
+	<option value="02">Hard fade</option>
+	<option value="04">Square scutes</option>
+	<option value="03">Armor plates</option>
+	<option value="05">Pointy armor</option>
+	<option value="06">Furred</option>
+	<option value="07">Grooved</option>
+	<option value="08">Soft shiny</option>
+	<option value="09">Finned</option>
+</select>
+    <div class="color-input-container">
+        <input type="color" id="bellyColor" value="#FFFFFF">
+        <input type="text" id="bellyColorHex" value="#FFFFFF">
+    </div><!-- color-input-container -->
+<br />
+<hr width="80%" />
+<br />
+<label for="spinedecStyle">Torso add-on:</label>
+<select id="spinedecStyle">
+    <option value="none">None</option>
+	<option value="01">Bony fish fin</option>
+	<option value="02">Fur ridge</option>
+	<option value="03">Feather ridge</option>
+	<option value="04">Spike ridge</option>
+	<option value="05">Soft frill</option>
+	<option value="06">Shark dorsal fin</option>
+	<option value="07">Featherquill dorsal fin</option>
+	<option value="08">Back plates - square</option>
+	<option value="09">Back plates - sharp</option>
+	<option value="10">Belly divider stripe</option>
+	<option value="11">Neck side plates</option>
+	<option value="12">Fullbody side plates</option>
+</select>
+  <div class="color-input-container">
+        <input type="color" id="spinedecColor" value="#6ABEFD">
+        <input type="text" id="spinedecColorHex" value="#6ABEFD">
+    </div><!-- color-input-container -->
+
+
+<label for="spinedecStyle2">Torso add-on 2:</label>
+<select id="spinedecStyle2">
+    <option value="none">None</option>
+	<option value="01">Bony fish fin</option>
+	<option value="02">Fur ridge</option>
+	<option value="03">Feather ridge</option>
+	<option value="04">Spike ridge</option>
+	<option value="05">Soft frill</option>
+	<option value="06">Shark dorsal fin</option>
+	<option value="07">Featherquill dorsal fin</option>
+	<option value="08">Back plates - square</option>
+	<option value="09">Back plates - sharp</option>
+	<option value="10">Belly divider scutes</option>
+	<option value="11">Neck side plates</option>
+	<option value="12">Fullbody side plates</option>
+</select>
+  <div class="color-input-container">
+        <input type="color" id="spinedecColor2" value="#6ABEFD">
+        <input type="text" id="spinedecColor2Hex" value="#6ABEFD">
+    </div><!-- color-input-container -->
+
+
+<label for="spinedecStyle3">Torso add-on 3:</label>
+<select id="spinedecStyle3">
+    <option value="none">None</option>
+	<option value="01">Bony fish fin</option>
+	<option value="02">Fur ridge</option>
+	<option value="03">Feather ridge</option>
+	<option value="04">Spike ridge</option>
+	<option value="05">Soft frill</option>
+	<option value="06">Shark dorsal fin</option>
+	<option value="07">Featherquill dorsal fin</option>
+	<option value="08">Back plates - square</option>
+	<option value="09">Back plates - sharp</option>
+	<option value="10">Belly divider stripe</option>
+	<option value="11">Neck side plates</option>
+	<option value="12">Fullbody side plates</option>
+</select>
+  <div class="color-input-container">
+        <input type="color" id="spinedecColor3" value="#6ABEFD">
+        <input type="text" id="spinedecColor3Hex" value="#6ABEFD">
+    </div><!-- color-input-container -->	
+
+<br />
+<hr width="80%" />
+<br />
+<label for="marking1Style">Torso marking 1:</label>
+<select id="marking1Style">
+    <option value="none">None</option>
+	<option value="10">Dorsal fade</option>
+	<option value="12">Rear end fade</option>
+	<option value="02">Tiger stripes</option>
+	<option value="19">Mackerel stripes</option>
+	<option value="04">Bars & dots</option>
+	<option value="06">Ring stripes</option>
+	<option value="08">Dalmation spots</option>
+	<option value="16">Leopard spots</option>
+	<option value="03">Speckles</option>
+    <option value="17">Blotches</option>
+	<option value="29">Side arrows</option>
+	<option value="25">Side scales</option>
+	<option value="31">Side dots</option>
+	<option value="21">Frosting</option>
+	<option value="32">Soft Marbling</option>
+	<option value="33">Lightning</option>
+	<option value="18">Skeleton</option>
+	<option value="41">Inner glow</option>
+	<option value="34">Alternating stripes A</option>
+	<option value="35">Alternating stripes B</option>
+	<option value="36">Gills - Axolotl</option>
+	<option value="37">Gills - Shark</option>
+</select>
+<div class="color-input-container">
+    <input type="color" id="marking1Color" value="#30537E">
+    <input type="text" id="marking1ColorHex" value="#30537E">
+</div> <!-- color-input-container -->
+
+<label for="marking2Style">Torso marking 2:</label>
+<select id="marking2Style">
+    <option value="none">None</option>
+	<option value="10">Dorsal fade</option>
+	<option value="12">Rear end fade</option>
+	<option value="02">Tiger stripes</option>
+	<option value="19">Mackerel stripes</option>
+	<option value="04">Bars & dots</option>
+	<option value="06">Ring stripes</option>
+	<option value="08">Dalmation spots</option>
+	<option value="16">Leopard spots</option>
+	<option value="03">Speckles</option>
+    <option value="17">Blotches</option>
+	<option value="29">Side arrows</option>
+	<option value="25">Side scales</option>
+	<option value="31">Side dots</option>
+	<option value="21">Frosting</option>
+	<option value="32">Soft Marbling</option>
+	<option value="33">Lightning</option>
+	<option value="18">Skeleton</option>
+	<option value="41">Inner glow</option>
+	<option value="34">Alternating stripes A</option>
+	<option value="35">Alternating stripes B</option>
+	<option value="36">Gills - Axolotl</option>
+	<option value="37">Gills - Shark</option>
+</select>
+<div class="color-input-container">
+    <input type="color" id="marking2Color" value="#30537E">
+    <input type="text" id="marking2ColorHex" value="#30537E">
+</div> <!-- color-input-container -->
+
+<label for="marking3Style">Torso marking 3:</label>
+<select id="marking3Style">
+    <option value="none">None</option>
+	<option value="10">Dorsal fade</option>
+	<option value="12">Rear end fade</option>
+	<option value="02">Tiger stripes</option>
+	<option value="19">Mackerel stripes</option>
+	<option value="04">Bars & dots</option>
+	<option value="06">Ring stripes</option>
+	<option value="08">Dalmation spots</option>
+	<option value="16">Leopard spots</option>
+	<option value="03">Speckles</option>
+    <option value="17">Blotches</option>
+	<option value="29">Side arrows</option>
+	<option value="25">Side scales</option>
+	<option value="31">Side dots</option>
+	<option value="21">Frosting</option>
+	<option value="32">Soft Marbling</option>
+	<option value="33">Lightning</option>
+	<option value="18">Skeleton</option>
+	<option value="41">Inner glow</option>
+	<option value="34">Alternating stripes A</option>
+	<option value="35">Alternating stripes B</option>
+	<option value="36">Gills - Axolotl</option>
+	<option value="37">Gills - Shark</option>
+</select>
+<div class="color-input-container">
+    <input type="color" id="marking3Color" value="#30537E">
+    <input type="text" id="marking3ColorHex" value="#30537E">
+</div> <!-- color-input-container -->
+<br />
+<hr width="80%" />
+<br />	
+<label for="torsoacc">Torso accessory 1 (in front of wing):</label>
+	<select id="torsoacc">
+	<option value="none">No torso accessory</option>
+	<option value="01">Leather harness</option>
+	<option value="02">Leather bags</option>
+	<option value="03">Adventuring backpack</option>
+	<option value="04">Saddle</option>
+	<option value="05">Draped blanket</option>
+	</select>
+
+<label for="torsoacc2">Torso accessory 2 (behind wing):</label>
+	<select id="torsoacc2">
+	<option value="none">No torso accessory</option>
+	<option value="01">Leather harness</option>
+	<option value="02">Leather bags</option>
+	<option value="03">Adventuring backpack</option>
+	<option value="04">Saddle</option>
+	<option value="05">Draped blanket</option>
+	</select>
+	
+</div><!-- section2 -->
+	
+<div id="section3" style="display:none">	
+<h3>Forelegs</h3>
+<hr width="80%" />
+<br />	
+<label for="forelegStyleSelect">Forelegs:</label>
+<select id="forelegStyleSelect">
+    <option value="none">No forelegs</option>
+	<option value="01" selected="selected">Hand-paw</option>
+    <option value="07">Three-toed claws</option>
+	<option value="05">Webbed</option>
+	<option value="02">Bat wing-walker</option>
+	<option value="04">Feather wing-walker</option>
+	<option value="03">Flipperfin</option>
+	<option value="06">Raptor arms</option>
+	<option value="08">Stompy squamate</option>
+</select>	
+<br />
+<br />	
+<label for="forelegdecStyle">Foreleg add-on 1:</label>
+<select id="forelegdecStyle">
+    <option value="none">None</option>
+	<option value="01">Fur</option>
+	<option value="02">Bony fish fins</option>
+	<option value="05">Spikes</option>
+	<option value="03">Feathers</option>
+	<option value="04">Lower leg scutes</option>
+    <option value="06">Frontal plating</option>
+</select>
+    <div class="color-input-container">
+        <input type="color" id="forelegdecColor" value="#6ABEFD">
+        <input type="text" id="forelegdecColorHex" value="#6ABEFD">
+    </div>	<!-- color-input-container -->	
+	
+
+<label for="forelegdecStyle2">Foreleg add-on 2:</label>
+<select id="forelegdecStyle2">
+    <option value="none">None</option>
+	<option value="01">Fur</option>
+	<option value="02">Bony fish fins</option>
+	<option value="05">Spikes</option>
+	<option value="03">Feathers</option>
+	<option value="04">Lower leg scutes</option>
+	<option value="06">Frontal plating</option>
+</select>
+    <div class="color-input-container">
+        <input type="color" id="forelegdecColor2" value="#6ABEFD">
+        <input type="text" id="forelegdecColor2Hex" value="#6ABEFD">
+    </div>	<!-- color-input-container -->		
+<br />	
+<hr width="80%" />
+<br />	
+<label for="forelegmarkingStyle">Foreleg marking 1:</label>
+<select id="forelegmarkingStyle">
+    <option value="none">None</option>
+	<option value="99">Special (specific to limb style)</option>
+	<option value="01">Ankle socks</option>
+	<option value="06">Opera gloves</option>
+	<option value="02">Mackerel stripes</option>
+	<option value="03">Ring stripes</option>
+	<option value="07">Swirls</option>
+	<option value="04">Skele</option>
+	<option value="05">Bars & dots</option>
+	<option value="08">Front patches</option>
+	<option value="10">Front dashes</option>
+	<option value="09">Dip</option>
+	<option value="11">Shoulders</option>
+	<option value="12">Underarms</option>
+
+	
+</select>
+<div class="color-input-container">
+    <input type="color" id="forelegmarkingColor" value="#FFFFFF">
+    <input type="text" id="forelegmarkingColorHex" value="#FFFFFF">
+</div>	<!-- color-input-container -->
+	
+
+<label for="forelegmarkingStyle2">Foreleg marking 2:</label>
+<select id="forelegmarkingStyle2">
+    <option value="none">None</option>
+	<option value="99">Special (specific to limb style)</option>
+	<option value="01">Ankle socks</option>
+	<option value="06">Opera gloves</option>
+	<option value="02">Mackerel stripes</option>
+	<option value="03">Ring stripes</option>
+	<option value="07">Swirls</option>
+	<option value="04">Skele</option>
+	<option value="05">Bars & dots</option>
+	<option value="08">Front patches</option>
+	<option value="10">Front dashes</option>
+	<option value="09">Dip</option>
+	<option value="11">Shoulders</option>
+	<option value="12">Underarms</option>
+	
+</select>
+<div class="color-input-container">
+    <input type="color" id="forelegmarkingColor2" value="#FFFFFF">
+    <input type="text" id="forelegmarkingColor2Hex" value="#FFFFFF">
+</div>	<!-- color-input-container -->	
+<br />
+<hr width="80%" />
+<br />
+<label for="forelegacc">Foreleg accessory 1:</label>
+<select id="forelegacc" disabled>
+    <option value="none">None (coming soon)</option>
+	<option value="01" disabled>Gold bracelet</option>
+	<option value="02" disabled>Gold rings</option>
+	<option value="03" disabled>Manacle</option>
+</select>
+<br />
+<br />
+<label for="forelegacc2">Foreleg accessory 2:</label>
+<select id="forelegacc2" disabled>
+    <option value="none">None (coming soon)</option>
+	<option value="01" disabled>Gold bracelet</option>
+	<option value="02" disabled>Gold rings</option>
+	<option value="03" disabled>Manacle</option>
+</select>
+<br />
+<hr width="80%" />
+<br />
+	<h3>Hind Legs</h3>
+<br />
+<hr width="80%" />
+<br />
+	
+<label for="hindlegStyleSelect">Hind legs:</label>
+<select id="hindlegStyleSelect">
+    <option value="none">No hindlegs</option>
+	<option value="01" selected="selected">Toe-paw</option>
+    <option value="02">Three-toed claws</option>
+	<option value="03">Flipperfin</option>
+	<option value="05">Webbed</option>
+	<option value="08">Theropod</option>
+	<option value="06">Mammalian paws</option>
+	<option value="07">Equine hooves</option>
+	<option value="04">Stompy squamate</option>
+</select>
+<br />
+<br />	
+
+	<label for="hindlegdecStyle">Hind leg add-on 1:</label>
+<select id="hindlegdecStyle">
+    <option value="none">None</option>
+	<option value="01">Fur</option>
+	<option value="02">Bony fish fins</option>
+	<option value="05">Spikes</option>
+	<option value="03">Feathers</option>
+	<option value="04">Armor scutes</option>
+</select>
+    <div class="color-input-container">
+        <input type="color" id="hindlegdecColor" value="#6ABEFD">
+        <input type="text" id="hindlegdecColorHex" value="#6ABEFD">
+</div><!-- color-input-container -->
+	
+	<label for="hindlegdecStyle2">Hind leg add-on 2:</label>
+<select id="hindlegdecStyle2">
+    <option value="none">None</option>
+	<option value="01">Fur</option>
+	<option value="02">Bony fish fins</option>
+	<option value="05">Spikes</option>
+	<option value="03">Feathers</option>
+	<option value="04">Armor scutes</option>
+</select>
+    <div class="color-input-container">
+        <input type="color" id="hindlegdecColor2" value="#6ABEFD">
+        <input type="text" id="hindlegdecColor2Hex" value="#6ABEFD">
+</div><!-- color-input-container -->	
+<br />	
+<hr width="80%" />
+<br />	
+<label for="hindlegmarkingStyle">Hind leg marking 1:</label>
+<select id="hindlegmarkingStyle">
+    <option value="none">None</option>
+	<option value="99">Special (specific to limb style)</option>
+	<option value="01">Ankle socks</option>
+	<option value="06">Thigh-high socks</option>
+	<option value="02">Mackerel stripes</option>
+	<option value="04">Ring stripes</option>
+	<option value="03">Swirls</option>
+	<option value="05">Skele</option>
+	<option value="07">Bars & dots</option>
+	
+</select>
+<div class="color-input-container">
+    <input type="color" id="hindlegmarkingColor" value="#FFFFFF">
+    <input type="text" id="hindlegmarkingColorHex" value="#FFFFFF">
+</div>	<!-- color-input-container -->
+
+<label for="hindlegmarkingStyle2">Hind leg marking 2:</label>
+<select id="hindlegmarkingStyle2">
+    <option value="none">None</option>
+	<option value="99">Special (specific to limb style)</option>
+	<option value="01">Ankle socks</option>
+	<option value="06">Thigh-high socks</option>
+	<option value="02">Mackerel stripes</option>
+	<option value="04">Ring stripes</option>
+	<option value="03">Swirls</option>
+	<option value="05">Skele</option>
+	<option value="07">Bars & dots</option>
+	
+</select>
+<div class="color-input-container">
+    <input type="color" id="hindlegmarkingColor2" value="#FFFFFF">
+    <input type="text" id="hindlegmarkingColor2Hex" value="#FFFFFF">
+</div>	<!-- color-input-container -->
+<br />
+<hr width="80%" />
+<br />
+
+<label for="hindlegacc">Hind leg accessory:</label>
+<select id="hindlegacc" disabled>
+    <option value="none">None (coming soon)</option>
+</select>
+
+<label for="hindlegacc2">Hind leg accessory 2:</label>
+<select id="hindlegacc2" disabled>
+    <option value="none">None (coming soon)</option>
+</select>
+
+
+</div><!-- section3 -->
+	
+<div id="section4" style="display:none">	
+
+<label for="hideFrontWing">
+<input type="checkbox" id="hideFrontWing"> Hide front wing
+</label>
+<br />
+
+<label for="wingStyle">Wing style:</label>
+<select id="wingStyle">
+		<option value="none">No wings</option>
+		<option value="01" selected="selected">Bat-like - medium</option>
+		<option value="13">Bat-like - medium transparent</option>
+		<option value="12">Bat-like - big</option>
+		<option value="04">Bat-like - mini</option> 
+		<option value="14">Swim-paddle</option> 
+		<option value="03">Feather/bat hybrid - big</option>
+		<option value="02">Feathered - big</option>
+		<option value="05">Feathered - mini</option>
+	    <option value="10">Dragonfly</option>
+		<option value="11">Butterfly</option> 
+        <option value="15" style="visibility: hidden;">Ornamental swoop</option>
+        <option value="16" style="visibility: hidden;">Chibi floating</option>
+</select>
+<br />
+<hr width="80%" />
+<br />
+
+<label for="wingColor">Wing color:</label>
+    <div class="color-input-container">
+        <input type="color" id="wingColor" value="#FFFFFF">
+        <input type="text" id="wingColorHex" value="#FFFFFF">
+   	</div> <!-- color-input-container -->	
+<br />
+<hr width="80%" />
+<br />
+<label for="wingmarkingdorsalStyle">Dorsal wing marking 1:</label>
+<select id="wingmarkingdorsalStyle">
+    <option value="none">None</option>
+	<option value="01">Fade towards ends</option>
+</select>
+<br />
+<br />
+<label for="wingmarkingdorsalColor">Dorsal wing marking 1 color:</label>
+<div class="color-input-container">
+    <input type="color" id="wingmarkingdorsalColor" value="#FFFFFF">
+    <input type="text" id="wingmarkingdorsalColorHex" value="#FFFFFF">
+</div>	<!-- color-input-container -->	
+<br />
+<br />
+<br />
+<label for="wingmarkingdorsalStyle2">Dorsal wing marking 2:</label>
+<select id="wingmarkingdorsalStyle2">
+<option value="none">None</option>
+<option value="01">Fade toward ends</option>
+</select>
+<label for="wingmarkingdorsalColor2">Dorsal wing marking 2 color:</label>
+<div class="color-input-container">
+<input type="color" id="wingmarkingdorsalColor2" value="#FFFFFF">
+<input type="text" id="wingmarkingdorsalColor2Hex" value="#FFFFFF">
+</div>	<!-- color-input-container -->	
+<br />
+<hr width="80%" />
+<br />
+<label for="wingmarkingventralStyle">Ventral wing marking 1:</label>
+<select id="wingmarkingventralStyle">
+<option value="none">None</option>
+<option value="01">Distal fade</option>
+<option value="02">Proximal fade</option>
+<option value="03">Edge outline</option>
+<option value="04">Fingerbones</option>
+<option value="05">Stars</option>
+<option value="06">Racing stripe</option>
+<option value="07">Layered flames</option>
+<option value="08">Stripes</option>
+<option value="09">Eye/target</option>
+<option value="10">False feathers</option>
+<option value="11">Water ripples</option>
+<option value="12">Clouds</option>
+<option value="13">Swirls</option>
+</select>
+<div class="color-input-container">
+<input type="color" id="wingmarkingventralColor" value="#FFFFFF">
+<input type="text" id="wingmarkingventralColorHex" value="#FFFFFF">
+</div>	<!-- color-input-container -->			
+
+<label for="wingmarkingventralStyle2">Ventral wing marking 2:</label>
+<select id="wingmarkingventralStyle2">
+<option value="none">None</option>
+<option value="01">Distal fade</option>
+<option value="02">Proximal fade</option>
+<option value="03">Edge outline</option>
+<option value="04">Fingerbones</option>
+<option value="05">Stars</option>
+<option value="06">Racing stripe</option>
+<option value="07">Layered flames</option>
+<option value="08">Stripes</option>
+<option value="09">Eye/target</option>
+<option value="10">False feathers</option>
+<option value="11">Water ripples</option>
+<option value="12">Clouds</option>
+<option value="13">Swirls</option>
+</select>
+	
+<div class="color-input-container">
+<input type="color" id="wingmarkingventralColor2" value="#FFFFFF">
+<input type="text" id="wingmarkingventralColor2Hex" value="#FFFFFF">
+</div>	<!-- color-input-container -->			
+	
+
+</div><!-- section4 -->
+	
+<div id="section5" style="display:none">	
+
+<label for="taildecStyle">Tail add-on 1:</label>
+<select id="taildecStyle">
+<option value="none">None</option>
+	<option value="01">Spade tip</option>
+	<option value="02">Arrowhead tip</option>
+	<option value="03">Cone tip</option>
+	<option value="04">Feather fan tip</option>
+	<option value="05">Bony fin</option>
+	<option value="06">Spikes</option>
+	<option value="07">Shark fin</option>
+	<option value="19">Shark fin 2</option>
+	<option value="08">Fur fan tip</option>
+	<option value="09">Flame tip</option>
+	<option value="10">Fur tuft tip</option>
+	<option value="11">Snake head tip</option>
+	<option value="12">Dolphin fluke tip</option>
+	<option value="13">Forked tip</option>
+	<option value="14">Eel fin</option>
+    <option value="30">Fur ridge</option>
+	<option value="15">Fur top & bottom</option>
+	<option value="16">Scorpion stinger tip</option>
+	<option value="17">Sand-stinger tip</option>
+	<option value="18">Soft frill ridge</option>
+	<option value="20">Quill cluster tip</option>
+	<option value="21">Thagomizer tip</option>
+	<option value="22">Fish sidefins</option>
+	<option value="23">Bony fin sidefins</option>
+	<option value="24">Feather sidefins</option>
+	<option value="25">Curly chameleon</option>
+    <option value="26">Curved blade tip</option>
+    <option value="27">Morningstar tip</option>
+    <option value="28">Paddle tip</option>
+    <option value="29">Bident tip</option>
+
+</select>
+<div class="color-input-container">
+<input type="color" id="taildecColor" value="#FDCD73">
+<input type="text" id="taildecColorHex" value="#FDCD73">
+</div><!-- color-input-container -->	
+	
+	
+<label for="taildecStyle2">Tail add-on 2:</label>
+<select id="taildecStyle2">
+<option value="none">None</option>
+	<option value="01">Spade tip</option>
+	<option value="02">Arrowhead tip</option>
+	<option value="03">Cone tip</option>
+	<option value="04">Feather fan tip</option>
+	<option value="05">Bony fin</option>
+	<option value="06">Spikes</option>
+	<option value="07">Shark fin</option>
+	<option value="19">Shark fin 2</option>
+	<option value="08">Fur fan tip</option>
+	<option value="09">Flame tip</option>
+	<option value="10">Fur tuft tip</option>
+	<option value="11">Snake head tip</option>
+	<option value="12">Dolphin fluke tip</option>
+	<option value="13">Forked tip</option>
+	<option value="14">Eel fin</option>
+    <option value="30">Fur ridge</option>
+	<option value="15">Fur top & bottom</option>
+	<option value="16">Scorpion stinger tip</option>
+	<option value="17">Sand-stinger tip</option>
+	<option value="18">Soft frill ridge</option>
+	<option value="20">Quill cluster tip</option>
+	<option value="21">Thagomizer tip</option>
+	<option value="22">Fish sidefins</option>
+	<option value="23">Bony fin sidefins</option>
+	<option value="24">Feather sidefins</option>
+	<option value="25">Curly chameleon</option>
+    <option value="26">Curved blade tip</option>
+    <option value="27">Morningstar tip</option>
+    <option value="28">Paddle tip</option>
+    <option value="29">Bident tip</option>
+</select>
+<div class="color-input-container">
+<input type="color" id="taildecColor2" value="#FDCD73">
+<input type="text" id="taildecColor2Hex" value="#FDCD73">
+</div><!-- color-input-container -->	
+	
+<br />
+<hr width="80%" />
+<br />
+<label for="tailmarkingStyle">Tail marking 1:</label>
+<select id="tailmarkingStyle">
+<option value="none">None</option>
+   <option value="none">None</option>
+	<option value="01">Tip dip</option>
+	<option value="05">Half tail fade</option>
+	<option value="04">Full tail recolor</option>	
+	<option value="02">Stripes</option>
+	<option value="07">Mackerel stripes</option>
+	<option value="06">Side stripe</option>
+	<option value="03">Icing</option>
+</select>
+<div class="color-input-container">
+<input type="color" id="tailmarkingColor" value="#FFFFFF">
+<input type="text" id="tailmarkingColorHex" value="#FFFFFF">
+</div>	<!-- color-input-container -->	
+
+<label for="tailmarking2Style">Tail marking 2:</label>
+<select id="tailmarking2Style">
+    <option value="none">None</option>
+	<option value="01">Tip dip</option>
+	<option value="05">Half tail fade</option>
+	<option value="04">Full tail recolor</option>	
+	<option value="02">Stripes</option>
+	<option value="07">Mackerel stripes</option>
+	<option value="06">Side stripe</option>
+	<option value="03">Icing</option>
+</select>
+<div class="color-input-container">
+<input type="color" id="tailmarking2Color" value="#FFFFFF">
+<input type="text" id="tailmarking2ColorHex" value="#FFFFFF">
+</div>	<!-- color-input-container -->	
+<br />
+<hr width="80%" />
+<br />
+<label for="tailacc">Tail accessory:</label>
+	<select id="tailacc">
+	<option value="none">No tail accessory</option>
+	<option value="01">Gold metal band</option>
+	<option value="02">Multiple gold bands</option>
+	<option value="03">Leather belts</option>
+	<option value="04">Leather bags</option>	
+	</select>
+	
+</div><!-- section5 -->	
+</div><!-- optionscontainer -->
+<div class="preset-row">
+  <button id="exportJSONButton" class="utilbutton">Export Settings File</button>
+  <label for="importJSON" class="fakeButton">Import Settings File</label>
+  <input type="file" id="importJSON" accept=".json" style="display:none">
+
+<select id="presetSelect" class="presetmenu">
+<option value="" selected disabled>Choose a Preset Dragon</option>
+<option value="default">Default</option>
+<option value="imperial">Imperial Red-Gold Lung</option>
+<option value="skywyvern">Feathered Quad-Wing Wyvern</option>
+<option value="quetz">Jungle Amphipthere - Quetzalcoatl</option>
+<option value="apep">Desert River-Serpent - Apep</option>
+<option value="arkus">Arkus the Storm Dragon</option>
+<option value="arashi">Arashi the Wolf-Dragon</option>
+<option value="" disabled>--- Offbrand Fan Dragons ----</option>
+<option value="haku">Haku</option>
+<option value="nightfury">Night Fury</option>
+<option value="lightfury">Light Fury</option>
+<option value="spyro">Spyro</option>
+<option value="cynder">Cynder</option>
+<option value="pernese">Pernese Copper</option>
+<option value="sandwing">SandWing</option>
+<option value="skywing">SkyWing</option>
+<option value="icewing">IceWing</option>
+<option value="mudwing">MudWing</option>
+<option value="nightwing">NightWing</option>
+<option value="rainwing">RainWing</option>
+<option value="seawing">SeaWing</option>
+<option value="hivewing">HiveWing</option>
+<option value="silkwing">SilkWing</option>
+<option value="leafwing">LeafWing</option>
+</select>
+
+  <button id="loadpresetButton" class="utilbutton yellow" disabled>Load Preset</button>
+</div> <!-- preset-row -->
+</div><!-- buildermenu -->
+
+</div>
+</div>
+<div id="confirmModal" class="modal-overlay">
+  <div class="modal-box">
+    <p id="confirmMessage">Are you sure?</p>
+    <div class="modal-buttons">
+      <button id="confirmYes">Yes</button>
+      <button id="confirmNo">Cancel</button>
+    </div> 
+
+  </div>
+</div>
+</body>
+</html>
